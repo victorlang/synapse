@@ -106,14 +106,11 @@ class PasswordRestServlet(RestServlet):
 
         body = parse_json_object_from_request(request)
 
-        authed, result, params, _ = yield self.auth_handler.check_auth([
+        result, params, _ = yield self.auth_handler.check_auth([
             [LoginType.PASSWORD],
             [LoginType.EMAIL_IDENTITY],
             [LoginType.MSISDN],
         ], body, self.hs.get_ip_from_request(request))
-
-        if not authed:
-            defer.returnValue((401, result))
 
         user_id = None
         requester = None
@@ -186,12 +183,9 @@ class DeactivateAccountRestServlet(RestServlet):
             )
             defer.returnValue((200, {}))
 
-        authed, result, params, _ = yield self.auth_handler.check_auth([
+        result, params, _ = yield self.auth_handler.check_auth([
             [LoginType.PASSWORD],
         ], body, self.hs.get_ip_from_request(request))
-
-        if not authed:
-            defer.returnValue((401, result))
 
         if LoginType.PASSWORD in result:
             user_id = result[LoginType.PASSWORD]

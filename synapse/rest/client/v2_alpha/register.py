@@ -325,13 +325,9 @@ class RegisterRestServlet(RestServlet):
                     [LoginType.MSISDN, LoginType.EMAIL_IDENTITY],
                 ])
 
-        authed, auth_result, params, session_id = yield self.auth_handler.check_auth(
+        auth_result, params, session_id = yield self.auth_handler.check_auth(
             flows, body, self.hs.get_ip_from_request(request)
         )
-
-        if not authed:
-            defer.returnValue((401, auth_result))
-            return
 
         if registered_user_id is not None:
             logger.info(

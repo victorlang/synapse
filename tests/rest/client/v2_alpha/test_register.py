@@ -24,7 +24,7 @@ class RegisterRestServletTestCase(unittest.TestCase):
             side_effect=lambda x: self.appservice)
         )
 
-        self.auth_result = (False, None, None, None)
+        self.auth_result = None
         self.auth_handler = Mock(
             check_auth=Mock(side_effect=lambda x, y, z: self.auth_result),
             get_session_data=Mock(return_value=None)
@@ -81,18 +81,6 @@ class RegisterRestServletTestCase(unittest.TestCase):
         }
         self.assertDictContainsSubset(det_data, result)
 
-    @defer.inlineCallbacks
-    def test_POST_appservice_registration_invalid(self):
-        self.request.args = {
-            "access_token": "i_am_an_app_service"
-        }
-        self.request_data = json.dumps({
-            "username": "kermit"
-        })
-        self.appservice = None  # no application service exists
-        result = yield self.servlet.on_POST(self.request)
-        self.assertEquals(result, (401, None))
-
     def test_POST_bad_password(self):
         self.request_data = json.dumps({
             "username": "kermit",
@@ -120,7 +108,7 @@ class RegisterRestServletTestCase(unittest.TestCase):
             "device_id": device_id,
         })
         self.registration_handler.check_username = Mock(return_value=True)
-        self.auth_result = (True, None, {
+        self.auth_result = (None, {
             "username": "kermit",
             "password": "monkey"
         }, None)
@@ -150,7 +138,7 @@ class RegisterRestServletTestCase(unittest.TestCase):
             "password": "monkey"
         })
         self.registration_handler.check_username = Mock(return_value=True)
-        self.auth_result = (True, None, {
+        self.auth_result = (None, {
             "username": "kermit",
             "password": "monkey"
         }, None)
