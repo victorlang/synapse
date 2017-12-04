@@ -15,9 +15,7 @@
 
 
 from synapse.api.errors import (
-    cs_exception, SynapseError, CodeMessageException, UnrecognizedRequestError,
-    Codes,
-    InteractiveAuthIncompleteError,
+    cs_exception, SynapseError, CodeMessageException, UnrecognizedRequestError, Codes
 )
 from synapse.util.logcontext import LoggingContext, PreserveLoggingContext
 from synapse.util.caches import intern_dict
@@ -262,11 +260,7 @@ class JsonResource(HttpServer, resource.Resource):
                 for name, value in m.groupdict().items()
             })
 
-            try:
-                callback_return = yield callback(request, **kwargs)
-            except InteractiveAuthIncompleteError as e:
-                callback_return = (401, e.result)
-
+            callback_return = yield callback(request, **kwargs)
             if callback_return is not None:
                 code, response = callback_return
                 self._send_response(request, code, response)

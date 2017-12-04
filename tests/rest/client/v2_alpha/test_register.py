@@ -1,5 +1,7 @@
+from twisted.python import failure
+
 from synapse.rest.client.v2_alpha.register import RegisterRestServlet
-from synapse.api.errors import SynapseError
+from synapse.api.errors import SynapseError, InteractiveAuthIncompleteError
 from twisted.internet import defer
 from mock import Mock
 from tests import unittest
@@ -24,7 +26,7 @@ class RegisterRestServletTestCase(unittest.TestCase):
             side_effect=lambda x: self.appservice)
         )
 
-        self.auth_result = None
+        self.auth_result = failure.Failure(InteractiveAuthIncompleteError(None))
         self.auth_handler = Mock(
             check_auth=Mock(side_effect=lambda x, y, z: self.auth_result),
             get_session_data=Mock(return_value=None)
@@ -80,6 +82,19 @@ class RegisterRestServletTestCase(unittest.TestCase):
             "home_server": self.hs.hostname
         }
         self.assertDictContainsSubset(det_data, result)
+
+    @defer.inlineCallbacks
+    def test_POST_appservice_registration_invalid(self):
+        self.request.args = {
+            "access_token": "i_am_an_app_service"
+        }
+
+        self.request_data = json.dumps({
+            "username": "kermit"
+        })
+        self.appservice = None  # no application service exists
+        result = yield self.servlet.on_POST(self.request)
+        self.assertEquals(result, (401, None))
 
     def test_POST_bad_password(self):
         self.request_data = json.dumps({
